@@ -1,10 +1,12 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   GoogleMap,
   LoadScript,
   Autocomplete,
   Marker,
+  InfoWindow,
 } from "@react-google-maps/api";
+import axios from "axios";
 
 const mapContainerStyle = {
   height: "100vh",
@@ -20,6 +22,51 @@ const GoogleMapComponent = () => {
   const mapRef = useRef(null);
   const autoCompleteRef = useRef(null);
   const [markers, setMarkers] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+  const [formData, setFormData] = useState({ title: "", description: "" });
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/locations")
+      .then((response) => {
+        setMarkers(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching locations data", error);
+      });
+  }, []);
+
+  const handleMapClick = (event) => {
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+
+    setSelectedLocation({ lat, lng });
+    setShowInfoWindow(true);
+  };
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+
+    if (formData.title && formData.description) {
+      const locationData = {
+        latitude: selectedLocation.lat,
+        longitude: selectedLocation.lng,
+        title: formData.title,
+        description: formData.description,
+      };
+
+      axios.post();
+      setMarkers((prevMarkers) => [
+        ...prevMarkers,
+        { lat: selectedLocation.lat, lng: selectedLocation.lng, ...formData },
+      ]);
+    }
+
+    setShowInfoWindow(false);
+    setFormData({ title: "", description: "" });
+    setSelectedLocation(null);
+  };
 
   const onLoad = useCallback((map) => {
     mapRef.current = map;
@@ -50,6 +97,7 @@ const GoogleMapComponent = () => {
         zoom={13}
         center={center}
         onLoad={onLoad}
+        onClick={handleMapClick}
       >
         <Autocomplete
           onLoad={(autoComplete) => (autoCompleteRef.current = autoComplete)}
@@ -77,8 +125,55 @@ const GoogleMapComponent = () => {
           />
         </Autocomplete>
         {markers.map((marker, index) => (
-          <Marker key={index} position={{ lat: marker.lat, lng: marker.lng }} />
+          <Marker key={index} position={{ lat: marker.lat, lng: marker.lng }}>
+            {/* Display an InfoWindow for each marker with its title and description */}
+            <InfoWindow position={{ lat: marker.lat, lng: marker.lng }}>
+              <div>
+                <h4>{marker.title}</h4>
+                <p>{marker.description}</p>
+              </div>
+            </InfoWindow>
+          </Marker>
         ))}
+
+        {/* Show the form as an InfoWindow when a location is selected */}
+        {showInfoWindow && selectedLocation && (
+          <InfoWindow
+            position={selectedLocation}
+            onCloseClick={() => setShowInfoWindow(false)}
+          >
+            <div>
+              <h3>Add a Location</h3>
+              <form onSubmit={handleFormSubmit}>
+                <div>
+                  <label>Title:</label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Description:</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        description: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <button type="submit">Add Location</button>
+              </form>
+            </div>
+          </InfoWindow>
+        )}
       </GoogleMap>
     </LoadScript>
   );
