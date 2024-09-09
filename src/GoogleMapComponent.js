@@ -6,7 +6,7 @@ import {
   Marker,
   InfoWindow,
 } from "@react-google-maps/api";
-import axios from "axios";
+import axiosInstance from "./axiosconfig";
 
 const mapContainerStyle = {
   height: "100vh",
@@ -26,15 +26,26 @@ const GoogleMapComponent = () => {
   const [showInfoWindow, setShowInfoWindow] = useState(false);
   const [formData, setFormData] = useState({ title: "", description: "" });
 
+  const fetchLocations = async () => {
+    try {
+      const response = await axiosInstance.get("/api/locations");
+      setMarkers(response.data);
+    } catch (error) {
+      console.error("Error fetching locations", error);
+    }
+  };
+
+  const saveLocation = async (newLocation) => {
+    try {
+      const response = await axiosInstance.post("/api/locations", newLocation);
+      setMarkers((prevMarkers) => [...prevMarkers, response.data]);
+    } catch (error) {
+      console.error("Error saving location", error);
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/api/locations")
-      .then((response) => {
-        setMarkers(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching locations data", error);
-      });
+    fetchLocations();
   }, []);
 
   const handleMapClick = (event) => {
@@ -45,7 +56,7 @@ const GoogleMapComponent = () => {
     setShowInfoWindow(true);
   };
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
 
     if (formData.title && formData.description) {
@@ -56,16 +67,12 @@ const GoogleMapComponent = () => {
         description: formData.description,
       };
 
-      axios.post();
-      setMarkers((prevMarkers) => [
-        ...prevMarkers,
-        { lat: selectedLocation.lat, lng: selectedLocation.lng, ...formData },
-      ]);
-    }
+      await saveLocation(locationData);
 
-    setShowInfoWindow(false);
-    setFormData({ title: "", description: "" });
-    setSelectedLocation(null);
+      setShowInfoWindow(false);
+      setFormData({ title: "", description: "" });
+      setSelectedLocation(null);
+    }
   };
 
   const onLoad = useCallback((map) => {
