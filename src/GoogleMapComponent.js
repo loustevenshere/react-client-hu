@@ -8,9 +8,19 @@ import {
 } from "@react-google-maps/api";
 import axiosInstance from "./axiosconfig";
 
-const mapContainerStyle = {
+const mapWrapperStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
   height: "100vh",
   width: "100%",
+};
+
+const mapContainerStyle = {
+  height: "80vh",
+  width: "80%",
+  borderRadius: "10px",
+  boxShadow: "0 4x 8px rgba(0,0,0,0.2)",
 };
 
 const center = {
@@ -153,108 +163,85 @@ const GoogleMapComponent = () => {
   };
 
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-      libraries={googleMapLibrary}
-    >
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        zoom={13}
-        center={center}
-        onLoad={onLoad}
-        onClick={handleMapClick}
+    <div style={mapWrapperStyle}>
+      <LoadScript
+        googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
+        libraries={googleMapLibrary}
       >
-        <Autocomplete
-          onLoad={(autoComplete) => (autoCompleteRef.current = autoComplete)}
-          onPlaceChanged={onPlacesChanged}
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          zoom={13}
+          center={center}
+          onLoad={onLoad}
+          onClick={handleMapClick}
         >
-          <input
-            type="text"
-            placeholder="Search for places..."
-            style={{
-              boxSizing: `border-box`,
-              border: `1px solid transparent`,
-              width: `400px`,
-              height: `40px`,
-              padding: `0 12px`,
-              borderRadius: `3px`,
-              boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-              fontSize: `16px`,
-              outline: `none`,
-              textOverflow: `ellipses`,
-              position: "absolute",
-              left: "50%",
-              marginLeft: "-200px",
-              top: "10px",
-            }}
-          />
-        </Autocomplete>
-        {locationMarkers.map((marker, index) => {
-          return (
-            <Marker
-              key={index}
-              position={{ lat: marker.latitude, lng: marker.longitude }}
-              onClick={() => {
-                setShowInfoWindow(true);
-                setSelectedLocation(marker);
-              }}
-            >
-              <InfoWindow
+          {locationMarkers.map((marker, index) => {
+            return (
+              <Marker
+                key={index}
                 position={{ lat: marker.latitude, lng: marker.longitude }}
+                onClick={() => {
+                  setShowInfoWindow(true);
+                  setSelectedLocation(marker);
+                }}
               >
-                <div>
-                  <h4>{marker.title}</h4>
-                  <p>{marker.description}</p>
-                </div>
-              </InfoWindow>
-            </Marker>
-          );
-        })}
+                <InfoWindow
+                  position={{ lat: marker.latitude, lng: marker.longitude }}
+                >
+                  <div>
+                    <h4>{marker.title}</h4>
+                    <p>{marker.description}</p>
+                  </div>
+                </InfoWindow>
+              </Marker>
+            );
+          })}
 
-        {/* Show the form as an InfoWindow when a location is selected */}
-        {showInfoWindow && selectedLocation && (
-          <InfoWindow
-            position={selectedLocation}
-            onCloseClick={() => setShowInfoWindow(false)}
-          >
-            <div style={infoWindowStyle}>
-              <h3 style={headingStyle}>Add a Location</h3>
-              <form onSubmit={handleFormSubmit} style={formStyle}>
-                <div style={formGroupStyle}>
-                  <label style={labelStyle}>Title:</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    required
-                    style={inputStyle}
-                  />
-                </div>
-                <div style={formGroupStyle}>
-                  <label style={labelStyle}>Description:</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        description: e.target.value,
-                      })
-                    }
-                    required
-                    style={{ ...inputStyle, height: "100px", resize: "none" }}
-                  />
-                </div>
-                <button type="submit" style={buttonStyle}>
-                  Add Location
-                </button>
-              </form>
-            </div>
-          </InfoWindow>
-        )}
-      </GoogleMap>
-    </LoadScript>
+          {/* Show the form as an InfoWindow when a location is selected */}
+          {showInfoWindow && selectedLocation && (
+            <InfoWindow
+              position={selectedLocation}
+              onCloseClick={() => setShowInfoWindow(false)}
+            >
+              <div style={infoWindowStyle}>
+                <h3 style={headingStyle}>Add a Location</h3>
+                <form onSubmit={handleFormSubmit} style={formStyle}>
+                  <div style={formGroupStyle}>
+                    <label style={labelStyle}>Title:</label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                      required
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div style={formGroupStyle}>
+                    <label style={labelStyle}>Description:</label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      required
+                      style={{ ...inputStyle, height: "100px", resize: "none" }}
+                    />
+                  </div>
+                  <button type="submit" style={buttonStyle}>
+                    Add Location
+                  </button>
+                </form>
+              </div>
+            </InfoWindow>
+          )}
+        </GoogleMap>
+      </LoadScript>
+    </div>
   );
 };
 
