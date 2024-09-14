@@ -2,93 +2,16 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   GoogleMap,
   LoadScript,
-  Autocomplete,
   Marker,
   InfoWindow,
 } from "@react-google-maps/api";
 import axiosInstance from "./axiosconfig";
 
-const mapWrapperStyle = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  height: "100vh",
-  width: "100%",
-};
-
-const mapContainerStyle = {
-  height: "80vh",
-  width: "80%",
-  borderRadius: "10px",
-  boxShadow: "0 4x 8px rgba(0,0,0,0.2)",
-};
-
-const center = {
-  lat: 39.965519,
-  lng: -75.181053,
-};
-
-const infoWindowStyle = {
-  padding: "10px",
-  width: "250px",
-  borderRadius: "10px",
-  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  backgroundColor: "#fff",
-};
-
-const headingStyle = {
-  fontSize: "18px",
-  marginBottom: "10px",
-  color: "#333",
-  fontWeight: "bold",
-  textAlign: "center",
-};
-
-const formStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "10px",
-};
-
-const formGroupStyle = {
-  display: "flex",
-  flexDirection: "column",
-};
-
-const labelStyle = {
-  marginBottom: "5px",
-  fontSize: "14px",
-  color: "#666",
-};
-
-const inputStyle = {
-  padding: "8px",
-  fontSize: "14px",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
-  width: "100%",
-};
-
-const buttonStyle = {
-  padding: "10px",
-  fontSize: "16px",
-  backgroundColor: "#007BFF",
-  color: "#fff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  transition: "background-color 0.3s",
-};
-
-buttonStyle[":hover"] = {
-  backgroundColor: "#0056b3",
-};
-
-const googleMapLibrary = ["places"];
+import * as styles from "./GoogleMapStyles";
+import { mapStartPoint, mapFeatures } from "./GoogleMapConfig";
 
 const GoogleMapComponent = () => {
   const mapRef = useRef(null);
-  const autoCompleteRef = useRef(null);
   const [locationMarkers, setLocationMarkers] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showInfoWindow, setShowInfoWindow] = useState(false);
@@ -147,33 +70,34 @@ const GoogleMapComponent = () => {
     mapRef.current = map;
   }, []);
 
-  const onPlacesChanged = () => {
-    const place = autoCompleteRef.current.getPlace();
-    if (place.geometry) {
-      setLocationMarkers([
-        {
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-        },
-      ]);
+  // const onPlacesChanged = () => {
+  //   const place = autoCompleteRef.current.getPlace();
+  //   if (place.geometry) {
+  //     setLocationMarkers([
+  //       {
+  //         lat: place.geometry.location.lat(),
+  //         lng: place.geometry.location.lng(),
+  //       },
+  //     ]);
 
-      // center map to the selected place
-      mapRef.current.panTo(place.geometry.location);
-    }
-  };
+  //     // center map to the selected place
+  //     mapRef.current.panTo(place.geometry.location);
+  //   }
+  // };
 
   return (
-    <div style={mapWrapperStyle}>
-      <LoadScript
-        googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-        libraries={googleMapLibrary}
-      >
+    <div style={styles.mapWrapperStyle}>
+      <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
         <GoogleMap
-          mapContainerStyle={mapContainerStyle}
+          mapContainerStyle={styles.mapContainerStyle}
           zoom={13}
-          center={center}
+          center={mapStartPoint}
           onLoad={onLoad}
           onClick={handleMapClick}
+          options={{
+            disableDefaultUI: true,
+            styles: mapFeatures,
+          }}
         >
           {locationMarkers.map((marker, index) => {
             return (
@@ -203,11 +127,11 @@ const GoogleMapComponent = () => {
               position={selectedLocation}
               onCloseClick={() => setShowInfoWindow(false)}
             >
-              <div style={infoWindowStyle}>
-                <h3 style={headingStyle}>Add a Location</h3>
-                <form onSubmit={handleFormSubmit} style={formStyle}>
-                  <div style={formGroupStyle}>
-                    <label style={labelStyle}>Title:</label>
+              <div style={styles.infoWindowStyle}>
+                <h3 style={styles.headingStyle}>Add a Location</h3>
+                <form onSubmit={handleFormSubmit} style={styles.formStyle}>
+                  <div style={styles.formGroupStyle}>
+                    <label style={styles.labelStyle}>Title:</label>
                     <input
                       type="text"
                       value={formData.title}
@@ -215,11 +139,11 @@ const GoogleMapComponent = () => {
                         setFormData({ ...formData, title: e.target.value })
                       }
                       required
-                      style={inputStyle}
+                      style={styles.inputStyle}
                     />
                   </div>
-                  <div style={formGroupStyle}>
-                    <label style={labelStyle}>Description:</label>
+                  <div style={styles.formGroupStyle}>
+                    <label style={styles.labelStyle}>Description:</label>
                     <textarea
                       value={formData.description}
                       onChange={(e) =>
@@ -229,10 +153,14 @@ const GoogleMapComponent = () => {
                         })
                       }
                       required
-                      style={{ ...inputStyle, height: "100px", resize: "none" }}
+                      style={{
+                        ...styles.inputStyle,
+                        height: "100px",
+                        resize: "none",
+                      }}
                     />
                   </div>
-                  <button type="submit" style={buttonStyle}>
+                  <button type="submit" style={styles.buttonStyle}>
                     Add Location
                   </button>
                 </form>
