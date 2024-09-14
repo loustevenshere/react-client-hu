@@ -18,10 +18,68 @@ const center = {
   lng: -75.181053,
 };
 
+const infoWindowStyle = {
+  padding: "10px",
+  width: "250px",
+  borderRadius: "10px",
+  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+  backgroundColor: "#fff",
+};
+
+const headingStyle = {
+  fontSize: "18px",
+  marginBottom: "10px",
+  color: "#333",
+  fontWeight: "bold",
+  textAlign: "center",
+};
+
+const formStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px",
+};
+
+const formGroupStyle = {
+  display: "flex",
+  flexDirection: "column",
+};
+
+const labelStyle = {
+  marginBottom: "5px",
+  fontSize: "14px",
+  color: "#666",
+};
+
+const inputStyle = {
+  padding: "8px",
+  fontSize: "14px",
+  borderRadius: "5px",
+  border: "1px solid #ccc",
+  width: "100%",
+};
+
+const buttonStyle = {
+  padding: "10px",
+  fontSize: "16px",
+  backgroundColor: "#007BFF",
+  color: "#fff",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+  transition: "background-color 0.3s",
+};
+
+buttonStyle[":hover"] = {
+  backgroundColor: "#0056b3",
+};
+
+const googleMapLibrary = ["places"];
+
 const GoogleMapComponent = () => {
   const mapRef = useRef(null);
   const autoCompleteRef = useRef(null);
-  const [markers, setMarkers] = useState([]);
+  const [locationMarkers, setLocationMarkers] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showInfoWindow, setShowInfoWindow] = useState(false);
   const [formData, setFormData] = useState({ title: "", description: "" });
@@ -29,7 +87,7 @@ const GoogleMapComponent = () => {
   const fetchLocations = async () => {
     try {
       const response = await axiosInstance.get("/api/locations");
-      setMarkers(response.data);
+      setLocationMarkers(response.data);
     } catch (error) {
       console.error("Error fetching locations", error);
     }
@@ -38,7 +96,7 @@ const GoogleMapComponent = () => {
   const saveLocation = async (newLocation) => {
     try {
       const response = await axiosInstance.post("/api/locations", newLocation);
-      setMarkers((prevMarkers) => [...prevMarkers, response.data]);
+      setLocationMarkers((prevMarkers) => [...prevMarkers, response.data]);
     } catch (error) {
       console.error("Error saving location", error);
     }
@@ -82,7 +140,7 @@ const GoogleMapComponent = () => {
   const onPlacesChanged = () => {
     const place = autoCompleteRef.current.getPlace();
     if (place.geometry) {
-      setMarkers([
+      setLocationMarkers([
         {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
@@ -97,7 +155,7 @@ const GoogleMapComponent = () => {
   return (
     <LoadScript
       googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-      libraries={["places"]}
+      libraries={googleMapLibrary}
     >
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
@@ -131,17 +189,27 @@ const GoogleMapComponent = () => {
             }}
           />
         </Autocomplete>
-        {markers.map((marker, index) => (
-          <Marker key={index} position={{ lat: marker.lat, lng: marker.lng }}>
-            {/* Display an InfoWindow for each marker with its title and description */}
-            <InfoWindow position={{ lat: marker.lat, lng: marker.lng }}>
-              <div>
-                <h4>{marker.title}</h4>
-                <p>{marker.description}</p>
-              </div>
-            </InfoWindow>
-          </Marker>
-        ))}
+        {locationMarkers.map((marker, index) => {
+          return (
+            <Marker
+              key={index}
+              position={{ lat: marker.latitude, lng: marker.longitude }}
+              onClick={() => {
+                setShowInfoWindow(true);
+                setSelectedLocation(marker);
+              }}
+            >
+              <InfoWindow
+                position={{ lat: marker.latitude, lng: marker.longitude }}
+              >
+                <div>
+                  <h4>{marker.title}</h4>
+                  <p>{marker.description}</p>
+                </div>
+              </InfoWindow>
+            </Marker>
+          );
+        })}
 
         {/* Show the form as an InfoWindow when a location is selected */}
         {showInfoWindow && selectedLocation && (
@@ -149,11 +217,11 @@ const GoogleMapComponent = () => {
             position={selectedLocation}
             onCloseClick={() => setShowInfoWindow(false)}
           >
-            <div>
-              <h3>Add a Location</h3>
-              <form onSubmit={handleFormSubmit}>
-                <div>
-                  <label>Title:</label>
+            <div style={infoWindowStyle}>
+              <h3 style={headingStyle}>Add a Location</h3>
+              <form onSubmit={handleFormSubmit} style={formStyle}>
+                <div style={formGroupStyle}>
+                  <label style={labelStyle}>Title:</label>
                   <input
                     type="text"
                     value={formData.title}
@@ -161,10 +229,11 @@ const GoogleMapComponent = () => {
                       setFormData({ ...formData, title: e.target.value })
                     }
                     required
+                    style={inputStyle}
                   />
                 </div>
-                <div>
-                  <label>Description:</label>
+                <div style={formGroupStyle}>
+                  <label style={labelStyle}>Description:</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) =>
@@ -174,9 +243,12 @@ const GoogleMapComponent = () => {
                       })
                     }
                     required
+                    style={{ ...inputStyle, height: "100px", resize: "none" }}
                   />
                 </div>
-                <button type="submit">Add Location</button>
+                <button type="submit" style={buttonStyle}>
+                  Add Location
+                </button>
               </form>
             </div>
           </InfoWindow>
