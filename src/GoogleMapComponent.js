@@ -12,21 +12,40 @@ import { mapStartPoint, mapFeatures } from "./GoogleMapConfig";
 
 const GoogleMapComponent = () => {
   const mapRef = useRef(null);
-  const [locationMarkers, setLocationMarkers] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [showInfoWindow, setShowInfoWindow] = useState(false);
-  const [formData, setFormData] = useState({ title: "", description: "" });
+  const [locationMarkers, setLocationMarkers] = useState([]); // from BE
+  const [selectedLocation, setSelectedLocation] = useState(null); // active user selected location
+  const [showInfoWindow, setShowInfoWindow] = useState(false); // InfoWindow state
+  const [formData, setFormData] = useState({ title: "", description: "" }); // formData
+  const [loadError, setLoadError] = useState(null);
+  const [isMapReady, setIsMapReady] = useState(false); // To check if the map should render
+
+  const onLoad = useCallback((map) => {
+    mapRef.current = map;
+  }, []);
+
+  useEffect(() => {
+    // fetch locations on page load
+    fetchLocations();
+  }, []);
+
+  const handleRetry = () => {
+    setLoadError(null);
+  };
 
   const fetchLocations = async () => {
+    // fetches saved locations from BE
     try {
       const response = await axiosInstance.get("/api/locations");
       setLocationMarkers(response.data);
+      setIsMapReady(true); // Set map ready when data is fetched
     } catch (error) {
       console.error("Error fetching locations", error);
+      setIsMapReady(true); // Set map ready when data is fetched
     }
   };
 
   const saveLocation = async (newLocation) => {
+    // saves locations and puts them into state
     try {
       const response = await axiosInstance.post("/api/locations", newLocation);
       setLocationMarkers((prevMarkers) => [...prevMarkers, response.data]);
@@ -35,16 +54,12 @@ const GoogleMapComponent = () => {
     }
   };
 
-  useEffect(() => {
-    fetchLocations();
-  }, []);
-
   const handleMapClick = (event) => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
-    setSelectedLocation({ lat, lng });
-    setShowInfoWindow(true);
+    setSelectedLocation({ lat, lng }); // sets the selected location
+    setShowInfoWindow(true); // shows the info window
   };
 
   const handleFormSubmit = async (event) => {
@@ -58,117 +73,122 @@ const GoogleMapComponent = () => {
         description: formData.description,
       };
 
-      await saveLocation(locationData);
+      await saveLocation(locationData); // saves location data
 
-      setShowInfoWindow(false);
+      setShowInfoWindow(false); // closes infowindow
       setFormData({ title: "", description: "" });
       setSelectedLocation(null);
     }
   };
 
-  const onLoad = useCallback((map) => {
-    mapRef.current = map;
-  }, []);
-
-  // const onPlacesChanged = () => {
-  //   const place = autoCompleteRef.current.getPlace();
-  //   if (place.geometry) {
-  //     setLocationMarkers([
-  //       {
-  //         lat: place.geometry.location.lat(),
-  //         lng: place.geometry.location.lng(),
-  //       },
-  //     ]);
-
-  //     // center map to the selected place
-  //     mapRef.current.panTo(place.geometry.location);
-  //   }
-  // };
-
   return (
     <div style={styles.mapWrapperStyle}>
-      <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
-        <GoogleMap
-          mapContainerStyle={styles.mapContainerStyle}
-          zoom={13}
-          center={mapStartPoint}
-          onLoad={onLoad}
-          onClick={handleMapClick}
-          options={{
-            disableDefaultUI: true,
-            styles: mapFeatures,
+      {loadError ? (
+        <div>
+          <p>Error loading map. Please try again.</p>
+          <button onClick={handleRetry} style={styles.buttonStyle}>
+            Load Map
+          </button>
+        </div>
+      ) : (
+        <LoadScript
+          googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
+          onError={(error) => {
+            setLoadError(error);
+            console.error("Error loading google maps", error);
           }}
         >
-          {locationMarkers.map((marker, index) => {
-            return (
-              <Marker
-                key={index}
-                position={{ lat: marker.latitude, lng: marker.longitude }}
-                onClick={() => {
-                  setShowInfoWindow(true);
-                  setSelectedLocation(marker);
-                }}
-              >
-                <InfoWindow
+          <GoogleMap
+            mapContainerStyle={styles.mapContainerStyle}
+            zoom={13}
+            center={mapStartPoint}
+            onLoad={onLoad}
+            onClick={handleMapClick}
+            options={{
+              disableDefaultUI: true,
+              styles: mapFeatures,
+            }}
+          >
+            {locationMarkers.map((marker, index) => {
+              console.log(marker);
+              return (
+                <Marker
+                  key={index}
                   position={{ lat: marker.latitude, lng: marker.longitude }}
+                  onClick={() => {
+                    setShowInfoWindow(true);
+                    setSelectedLocation(marker);
+                  }}
                 >
-                  <div>
-                    <h4>{marker.title}</h4>
-                    <p>{marker.description}</p>
-                  </div>
-                </InfoWindow>
-              </Marker>
-            );
-          })}
+                  {selectedLocation &&
+                    selectedLocation === marker &&
+                    showInfoWindow && (
+                      <InfoWindow
+                        position={{
+                          lat: selectedLocation.latitude,
+                          lng: selectedLocation.longitude,
+                        }}
+                        onCloseClick={() => setShowInfoWindow(false)}
+                      >
+                        <div>
+                          <h4>{marker.title}</h4>
+                          <p>{marker.description}</p>
+                        </div>
+                      </InfoWindow>
+                    )}
+                </Marker>
+              );
+            })}
 
-          {/* Show the form as an InfoWindow when a location is selected */}
-          {showInfoWindow && selectedLocation && (
-            <InfoWindow
-              position={selectedLocation}
-              onCloseClick={() => setShowInfoWindow(false)}
-            >
-              <div style={styles.infoWindowStyle}>
-                <h3 style={styles.headingStyle}>Add a Location</h3>
-                <form onSubmit={handleFormSubmit} style={styles.formStyle}>
-                  <div style={styles.formGroupStyle}>
-                    <label style={styles.labelStyle}>Title:</label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
-                      }
-                      required
-                      style={styles.inputStyle}
-                    />
-                  </div>
-                  <div style={styles.formGroupStyle}>
-                    <label style={styles.labelStyle}>Description:</label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      required
-                      style={{
-                        ...styles.inputStyle,
-                        height: "100px",
-                        resize: "none",
-                      }}
-                    />
-                  </div>
-                  <button type="submit" style={styles.buttonStyle}>
-                    Add Location
-                  </button>
-                </form>
-              </div>
-            </InfoWindow>
-          )}
-        </GoogleMap>
-      </LoadScript>
+            {/* Show the form as an InfoWindow when a location is selected */}
+            {showInfoWindow && selectedLocation && (
+              <InfoWindow
+                position={selectedLocation}
+                onCloseClick={() => setShowInfoWindow(false)}
+              >
+                <div style={styles.infoWindowStyle}>
+                  <h3 style={styles.headingStyle}>Add a Location</h3>
+                  <form onSubmit={handleFormSubmit} style={styles.formStyle}>
+                    <div style={styles.formGroupStyle}>
+                      <label style={styles.labelStyle}>Title:</label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
+                        required
+                        style={styles.inputStyle}
+                      />
+                    </div>
+                    <div style={styles.formGroupStyle}>
+                      <label style={styles.labelStyle}>Description:</label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
+                        required
+                        style={{
+                          ...styles.inputStyle,
+                          height: "90px",
+                          resize: "none",
+                        }}
+                      />
+                    </div>
+                    <button type="submit" style={styles.buttonStyle}>
+                      Add Location
+                    </button>
+                  </form>
+                </div>
+              </InfoWindow>
+            )}
+          </GoogleMap>
+        </LoadScript>
+      )}
     </div>
   );
 };

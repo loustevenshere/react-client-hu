@@ -4,21 +4,24 @@ export const mapWrapperStyle = {
   alignItems: "center",
   height: "100vh",
   width: "100%",
+  cursor: "default",
 };
 
 export const mapContainerStyle = {
-  height: "80vh",
-  width: "80%",
+  height: "90vh",
+  width: "90%",
   borderRadius: "10px",
   boxShadow: "0 4x 8px rgba(0,0,0,0.2)",
+  cursor: "pointer !important",
 };
 
 export const infoWindowStyle = {
   padding: "10px",
-  width: "250px",
+  width: "200px",
   borderRadius: "10px",
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
   backgroundColor: "#fff",
+  height: "fit-content",
 };
 
 export const headingStyle = {
@@ -48,15 +51,15 @@ export const labelStyle = {
 
 export const inputStyle = {
   padding: "8px",
-  fontSize: "14px",
+  fontSize: "10px",
   borderRadius: "5px",
   border: "1px solid #ccc",
-  width: "100%",
+  width: "90%",
 };
 
 export const buttonStyle = {
   padding: "10px",
-  fontSize: "16px",
+  fontSize: "10px",
   backgroundColor: "#007BFF",
   color: "#fff",
   border: "none",
