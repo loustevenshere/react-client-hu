@@ -14,10 +14,12 @@ const GoogleMapComponent = () => {
   const mapRef = useRef(null);
   const [locationMarkers, setLocationMarkers] = useState([]); // from BE
   const [selectedLocation, setSelectedLocation] = useState(null); // active user selected location
-  const [showInfoWindow, setShowInfoWindow] = useState(false); // InfoWindow state
+  const [showLocationForm, setShowLocationForm] = useState(false); // InfoWindow state
   const [formData, setFormData] = useState({ title: "", description: "" }); // formData
   const [loadError, setLoadError] = useState(null);
   const [isMapReady, setIsMapReady] = useState(false); // To check if the map should render
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+  const [activeMarker, setActiveMarker] = useState(null);
 
   const onLoad = useCallback((map) => {
     mapRef.current = map;
@@ -59,7 +61,7 @@ const GoogleMapComponent = () => {
     const lng = event.latLng.lng();
 
     setSelectedLocation({ lat, lng }); // sets the selected location
-    setShowInfoWindow(true); // shows the info window
+    setShowLocationForm(true); // shows the info window
   };
 
   const handleFormSubmit = async (event) => {
@@ -115,36 +117,37 @@ const GoogleMapComponent = () => {
                 <Marker
                   key={index}
                   position={{ lat: marker.latitude, lng: marker.longitude }}
-                  onClick={() => {
+                  onClick={(event) => {
+                    setActiveMarker(marker);
                     setShowInfoWindow(true);
-                    setSelectedLocation(marker);
                   }}
-                >
-                  {selectedLocation &&
-                    selectedLocation === marker &&
-                    showInfoWindow && (
-                      <InfoWindow
-                        position={{
-                          lat: selectedLocation.latitude,
-                          lng: selectedLocation.longitude,
-                        }}
-                        onCloseClick={() => setShowInfoWindow(false)}
-                      >
-                        <div>
-                          <h4>{marker.title}</h4>
-                          <p>{marker.description}</p>
-                        </div>
-                      </InfoWindow>
-                    )}
-                </Marker>
+                ></Marker>
               );
             })}
 
+            {showInfoWindow && activeMarker && (
+              <InfoWindow
+                position={{
+                  lat: activeMarker.latitude,
+                  lng: activeMarker.longitude,
+                }}
+                onCloseClick={() => {
+                  setActiveMarker(null);
+                  setShowInfoWindow(false);
+                }}
+              >
+                <div style={styles.infoWindowStyle}>
+                  <h3 style={styles.headingStyle}>{activeMarker.title}</h3>
+                  <p>{activeMarker.description}</p>
+                </div>
+              </InfoWindow>
+            )}
+
             {/* Show the form as an InfoWindow when a location is selected */}
-            {showInfoWindow && selectedLocation && (
+            {showLocationForm && selectedLocation && (
               <InfoWindow
                 position={selectedLocation}
-                onCloseClick={() => setShowInfoWindow(false)}
+                onCloseClick={() => setShowLocationForm(false)}
               >
                 <div style={styles.infoWindowStyle}>
                   <h3 style={styles.headingStyle}>Add a Location</h3>
