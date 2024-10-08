@@ -1,12 +1,11 @@
 import React from "react";
 import "./App.css";
-import GoogleMapComponent from "./GoogleMapComponent";
-
+import GoogleMap from "./GoogleMap";
 function App() {
   return (
     <div className="App">
       <h1>HappenUpon</h1>
-      <GoogleMapComponent />
+      <GoogleMap />
     </div>
   );
 }
