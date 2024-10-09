@@ -28,43 +28,81 @@ function MyMap() {
   const ref = useRef();
 
   useEffect(() => {
-    setMap(new window.google.maps.Map(ref.current, mapOptions));
-  }, []);
+    if (!map) {
+      const mapInstance = new window.google.maps.Map(ref.current, mapOptions);
+      setMap(mapInstance);
+
+      // event listener is not working on map
+
+      // add handleMapClick function here
+      const handleMapClick = (e) => {
+        debugger;
+        console.log("Map clicked", e.latLng.toJSON());
+      };
+
+      mapInstance.addListener("click", handleMapClick);
+
+      return () => {
+        if (mapInstance) {
+          window.google.maps.event.clearInstanceListeners(mapInstance);
+        }
+      };
+    }
+  }, [map]);
+
+  // function handleMapClick(e) {
+  //   debugger;
+  //   const newMarkerPosition = {
+  //     lat: e.latLng.lat(),
+  //     lng: e.latLng.lng(),
+  //   };
+
+  //   const newMarker = (
+  //     <Marker
+  //       key={JSON.stringify(newMarkerPosition)}
+  //       map={map}
+  //       position={newMarkerPosition}
+  //       onClick={() => console.log("Marker clicked:", newMarkerPosition)}
+  //     >
+  //       <div className="marker">
+  //         <h2>New Marker</h2>
+  //       </div>
+  //     </Marker>
+  //   );
+
+  //   setMarkers((prevMarkers) => [...prevMarkers, newMarker]);
+  // }
+
+  const [markers, setMarkers] = useState([]);
 
   return (
     <>
       <div ref={ref} id="map" style={{ height: "100vh", width: "100%" }} />
-      {map && <Weather map={map} />}
+      {map && <UserLocations map={map} />}
     </>
   );
 }
 
-const weatherData = {
-  A: {
-    name: "Toronto",
+const locations = [
+  {
+    name: "Lou",
     position: { lat: 43.66293, lng: -79.39314 },
     climate: "Raining",
-    temp: 20,
-    fiveDay: [15, 18, 12, 22, 20],
   },
-  B: {
-    name: "Guelph",
+  {
+    name: "Tina",
     position: { lat: 43.544811, lng: -80.248108 },
     climate: "Cloudy",
-    temp: 20,
-    fiveDay: [15, 18, 12, 22, 20],
   },
-  C: {
-    name: "Orangeville",
+  {
+    name: "Indie & Beau",
     position: { lat: 43.919239, lng: -80.097412 },
     climate: "Sunny",
-    temp: 20,
-    fiveDay: [15, 18, 12, 22, 20],
   },
-};
+];
 
-const Weather = ({ map }) => {
-  const [data, setData] = useState(weatherData);
+const UserLocations = ({ map }) => {
+  const [data, setData] = useState(locations);
   const [highlight, setHighlight] = useState();
   const [editing, setEditing] = useState();
 
@@ -81,26 +119,24 @@ const Weather = ({ map }) => {
           close={() => setEditing(null)}
         />
       )}
-      {Object.entries(data).map(([key, weather]) => (
+      {data.map((location, key) => (
         <Marker
           key={key}
           map={map}
-          position={weather.position}
+          position={location.position}
           onClick={() => setEditing(key)}
         >
           <div
-            className={`marker ${weather.climate.toLowerCase()} ${
+            className={`marker ${location.climate.toLowerCase()} ${
               highlight === key || editing === key ? "highlight" : ""
             }`}
             onMouseEnter={() => setHighlight(key)}
             onMouseLeave={() => setHighlight(null)}
           >
-            <h2>{weather.climate}</h2>
-            <div>{weather.temp}</div>
+            <h2>{location.name}</h2>
             {highlight === key || editing === key ? (
               <div className="five-day">
-                <p>Next 5</p>
-                <p>{weather.fiveDay.join(", ")}</p>
+                <p>Im highlighted</p>
               </div>
             ) : null}
           </div>
