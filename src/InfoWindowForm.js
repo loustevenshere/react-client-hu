@@ -1,15 +1,19 @@
 import { useState } from "react";
 
-export default function InfoWindowForm() {
+export default function InfoWindowForm({ onSubmit, infoWindowPosition }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     type: "",
+    position: {
+      lat: infoWindowPosition.lat,
+      lng: infoWindowPosition.lng,
+    },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    onSubmit(formData);
   };
 
   const handleChange = (e) => {

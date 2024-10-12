@@ -16,6 +16,23 @@ const GoogleMapPackage = () => {
   const [locations, setLocations] = useState([]);
   const [infoWindowPosition, setInfoWindowPosition] = useState(null);
 
+  // Marker should show infoWindow when clicked
+  // InfoWindow should close when X button is clicked OR when map is clicked
+  // Form should NOT show when Marker Info window is open
+  // commit
+
+  const handleMapClick = (e) => {
+    setInfoWindowPosition({
+      lat: e.detail.latLng.lat,
+      lng: e.detail.latLng.lng,
+    });
+  };
+
+  const saveLocation = (newLocation) => {
+    setLocations((prev) => [...prev, newLocation]);
+    setInfoWindowPosition(null);
+  };
+
   return (
     <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
       <Map
@@ -24,25 +41,7 @@ const GoogleMapPackage = () => {
         mapId="d6a6aad9821eda26"
         colorScheme={darkMode ? "DARK" : null}
         style={{ height: "100vh" }}
-        onClick={(e) => {
-          // show infoWindow at the clicked position
-          setInfoWindowPosition({
-            lat: e.detail.latLng.lat,
-            lng: e.detail.latLng.lng,
-          });
-
-          //   console.log(locations);
-          //   debugger;
-          //   const newLocation = {
-          //     name: "New Marker",
-          //     position: {
-          //       lat: e.detail.latLng.lat,
-          //       lng: e.detail.latLng.lng,
-          //     },
-          //   };
-
-          //   setLocations((prevLocations) => [...prevLocations, newLocation]);
-        }}
+        onClick={handleMapClick}
       >
         {locations.map((location, index) => (
           <AdvancedMarker key={index} position={location.position}>
@@ -59,7 +58,10 @@ const GoogleMapPackage = () => {
             position={infoWindowPosition}
             onCloseClick={() => setInfoWindowPosition(null)}
           >
-            <InfoWindowForm />
+            <InfoWindowForm
+              infoWindowPosition={infoWindowPosition}
+              onSubmit={saveLocation}
+            />
           </InfoWindow>
         ) : null}
 
