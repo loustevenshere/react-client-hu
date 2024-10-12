@@ -9,20 +9,27 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useState } from "react";
 import InfoWindowForm from "./InfoWindowForm";
+import { CustomMarker } from "./CustomMarker";
 
 const GoogleMapPackage = () => {
   const position = { lat: 53.54992, lng: 10.00678 };
   const [darkMode, setDarkMode] = useState(false);
   const [locations, setLocations] = useState([]);
-  const [infoWindowPosition, setInfoWindowPosition] = useState(null);
+  const [formInfoWindowPosition, setFormInfoWindowPosition] = useState(null);
+  const [markerInfoPosition, setMarkerInfoPosition] = useState(null);
 
+  // TODO
   // Marker should show infoWindow when clicked
   // InfoWindow should close when X button is clicked OR when map is clicked
   // Form should NOT show when Marker Info window is open
   // commit
 
+  const showMarkerInfo = (location) => {
+    console.log(location);
+  };
+
   const handleMapClick = (e) => {
-    setInfoWindowPosition({
+    setFormInfoWindowPosition({
       lat: e.detail.latLng.lat,
       lng: e.detail.latLng.lng,
     });
@@ -30,7 +37,7 @@ const GoogleMapPackage = () => {
 
   const saveLocation = (newLocation) => {
     setLocations((prev) => [...prev, newLocation]);
-    setInfoWindowPosition(null);
+    setFormInfoWindowPosition(null);
   };
 
   return (
@@ -44,34 +51,20 @@ const GoogleMapPackage = () => {
         onClick={handleMapClick}
       >
         {locations.map((location, index) => (
-          <AdvancedMarker key={index} position={location.position}>
-            <Pin
-              background={"#FBBC04"}
-              glyphColor={"#000"}
-              borderColor={"#000"}
-            />
-          </AdvancedMarker>
+          <CustomMarker key={index} location={location} />
         ))}
 
-        {infoWindowPosition ? (
+        {formInfoWindowPosition ? (
           <InfoWindow
-            position={infoWindowPosition}
-            onCloseClick={() => setInfoWindowPosition(null)}
+            position={formInfoWindowPosition}
+            onCloseClick={() => setFormInfoWindowPosition(null)}
           >
             <InfoWindowForm
-              infoWindowPosition={infoWindowPosition}
+              infoWindowPosition={formInfoWindowPosition}
               onSubmit={saveLocation}
             />
           </InfoWindow>
         ) : null}
-
-        {/* <AdvancedMarker position={position}>
-          <Pin
-            background={"#FBBC04"}
-            glyphColor={"#000"}
-            borderColor={"#000"}
-          />
-        </AdvancedMarker> */}
       </Map>
     </APIProvider>
   );
