@@ -16,9 +16,16 @@ const typeColors = {
 const MarkerInfoWindow = ({ location, marker, onClose }) => {
   return (
     <InfoWindow anchor={marker} onClose={onClose} className="p-2">
-      <h3 className="text-lg font-semibold text-black">{location.title}</h3>
-      <p className="text-sm text-black">{location.description}</p>
-      <p className="text-sm font-semibold text-black">{location.type}</p>
+      <div className="flex items-center mb-2">
+        <div
+          className={`w-4 h-4 rounded-full ${
+            typeColors[location.type] || typeColors.default
+          } mr-2`}
+        ></div>
+        <h3 className="text-lg font-semibold text-black">{location.title}</h3>
+      </div>
+      <p className="text-sm text-gray-700 mb-2">{location.description}</p>
+      <p className="text-sm font-semibold text-gray-900">{location.type}</p>
     </InfoWindow>
   );
 };

@@ -28,6 +28,7 @@ export default function InfoWindowForm({ onSubmit, infoWindowPosition }) {
     <div className="p-4 max-w-sm bg-white rounded-lg">
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
+          <h3 style={{ color: "black" }}> Add Location</h3>
           <label
             htmlFor="title"
             className="block text-sm font-medium text-gray-700 mb-1"

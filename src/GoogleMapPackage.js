@@ -45,6 +45,7 @@ const GoogleMapPackage = () => {
         style={{ height: "100vh" }}
         onClick={handleMapClick}
         gestureHandling={"cooperative"}
+        setClickableIcons={false}
       >
         {locations.map((location, index) => (
           <CustomMarker key={index} location={location} />
