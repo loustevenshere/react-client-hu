@@ -18,12 +18,6 @@ const GoogleMapPackage = () => {
   const [formInfoWindowPosition, setFormInfoWindowPosition] = useState(null);
   const [markerInfoPosition, setMarkerInfoPosition] = useState(null);
 
-  // TODO
-  // Marker should show infoWindow when clicked
-  // InfoWindow should close when X button is clicked OR when map is clicked
-  // Form should NOT show when Marker Info window is open
-  // commit
-
   const showMarkerInfo = (location) => {
     console.log(location);
   };
@@ -45,7 +39,7 @@ const GoogleMapPackage = () => {
       <Map
         defaultCenter={position}
         defaultZoom={15}
-        mapId="d6a6aad9821eda26"
+        mapId={process.env.REACT_APP_GOOGLE_MAPS_MAP_ID}
         colorScheme={darkMode ? "DARK" : null}
         style={{ height: "100vh" }}
         onClick={handleMapClick}
