@@ -13,9 +13,9 @@ const typeColors = {
   default: "bg-gray-500",
 };
 
-const MarkerInfoWindow = ({ location, marker }) => {
+const MarkerInfoWindow = ({ location, marker, onClose }) => {
   return (
-    <InfoWindow anchor={marker} className="p-2">
+    <InfoWindow anchor={marker} onClose={onClose} className="p-2">
       <h3 className="text-lg font-semibold text-black">{location.title}</h3>
       <p className="text-sm text-black">{location.description}</p>
       <p className="text-sm font-semibold text-black">{location.type}</p>
@@ -31,14 +31,30 @@ export const CustomMarker = ({ location, onClick }) => {
   const expandedStyles = isExpanded ? "w-48 h-auto" : "w-32 h-8";
   const typeColor = typeColors[location.type] || typeColors.default;
 
+  const handleMarkerClick = (e) => {
+    // e.domEvent.stopPropagation();
+    // e.domEvent.preventDefault();
+    console.log(e, "Marker clicked");
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <AdvancedMarker
       position={location.position}
-      onClick={(e) => setIsExpanded(!isExpanded)}
+      onClick={handleMarkerClick}
       ref={markerRef}
+      onCloseClick={() => setIsExpanded(false)}
     >
       <Pin background={"#FBBC04"} glyphColor={"#000"} borderColor={"#000"} />
-      {isExpanded && <MarkerInfoWindow location={location} marker={marker} />}
+      {isExpanded && (
+        <MarkerInfoWindow
+          location={location}
+          marker={marker}
+          onClose={() => {
+            setIsExpanded(false);
+          }}
+        />
+      )}
     </AdvancedMarker>
   );
 };

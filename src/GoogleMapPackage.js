@@ -23,6 +23,7 @@ const GoogleMapPackage = () => {
   };
 
   const handleMapClick = (e) => {
+    console.log(e, "Map clicked");
     setFormInfoWindowPosition({
       lat: e.detail.latLng.lat,
       lng: e.detail.latLng.lng,
@@ -43,6 +44,7 @@ const GoogleMapPackage = () => {
         colorScheme={darkMode ? "DARK" : null}
         style={{ height: "100vh" }}
         onClick={handleMapClick}
+        gestureHandling={"cooperative"}
       >
         {locations.map((location, index) => (
           <CustomMarker key={index} location={location} />
