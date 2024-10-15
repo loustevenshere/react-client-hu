@@ -30,18 +30,11 @@ const MarkerInfoWindow = ({ location, marker, onClose }) => {
   );
 };
 
-export const CustomMarker = ({ location, onClick }) => {
+export const CustomMarker = ({ location }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [markerRef, marker] = useAdvancedMarkerRef();
-  const baseStyles =
-    "transition-all duration-300 ease-in-out rounded-lg shadow-md cursor-pointer";
-  const expandedStyles = isExpanded ? "w-48 h-auto" : "w-32 h-8";
-  const typeColor = typeColors[location.type] || typeColors.default;
 
   const handleMarkerClick = (e) => {
-    // e.domEvent.stopPropagation();
-    // e.domEvent.preventDefault();
-    console.log(e, "Marker clicked");
     setIsExpanded(!isExpanded);
   };
 
