@@ -2,7 +2,7 @@ import { APIProvider, Map, InfoWindow } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
 import InfoWindowForm from "./InfoWindowForm";
 import { CustomMarker } from "./CustomMarker";
-import axiosInstance from "./axiosconfig";
+import axiosInstance from "../config/axiosconfig";
 
 const GoogleMapPackage = () => {
   const position = { lat: 53.54992, lng: 10.00678 };
