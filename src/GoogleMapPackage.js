@@ -67,9 +67,12 @@ const GoogleMapPackage = () => {
         gestureHandling={"cooperative"}
         setClickableIcons={false}
       >
-        {locations.map((location, index) => (
-          <CustomMarker key={index} location={location} />
-        ))}
+        {locations.map((location, index) => {
+          if (!location?.position?.lat || !location?.position?.lng) {
+            return null;
+          }
+          return <CustomMarker key={index} location={location} />;
+        })}
 
         {formInfoWindowPosition ? (
           <InfoWindow
