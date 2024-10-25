@@ -18,11 +18,7 @@ const GoogleMapPackage = () => {
   // hover state over markers??
 
   // BE - TODO
-  // Lets get save working with h2 database
-  // Then switch to MongoDB
-  // Create a new location
   // DELETE a location
-  // GET all locations
   // UPDATE a location
 
   const fetchLocations = async () => {
