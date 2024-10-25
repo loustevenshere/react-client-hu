@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import GoogleMap from "./GoogleMapPackage";
+import GoogleMap from "./components/GoogleMapContainer";
 function App() {
   return (
     <div className="App">

@@ -2,7 +2,7 @@ import { APIProvider, Map, InfoWindow } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
 import InfoWindowForm from "./InfoWindowForm";
 import { CustomMarker } from "./CustomMarker";
-import axiosInstance from "./axiosconfig";
+import axiosInstance from "../config/axiosconfig";
 
 const GoogleMapPackage = () => {
   const position = { lat: 53.54992, lng: 10.00678 };
@@ -67,9 +67,12 @@ const GoogleMapPackage = () => {
         gestureHandling={"cooperative"}
         setClickableIcons={false}
       >
-        {locations.map((location, index) => (
-          <CustomMarker key={index} location={location} />
-        ))}
+        {locations.map((location, index) => {
+          if (!location?.position?.lat || !location?.position?.lng) {
+            return null;
+          }
+          return <CustomMarker key={index} location={location} />;
+        })}
 
         {formInfoWindowPosition ? (
           <InfoWindow
