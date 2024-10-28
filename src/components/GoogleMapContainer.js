@@ -5,8 +5,11 @@ import { CustomMarker } from "./CustomMarker";
 import axiosInstance from "../config/axiosconfig";
 
 const GoogleMapPackage = () => {
-  const position = { lat: 53.54992, lng: 10.00678 };
   // const [darkMode, setDarkMode] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState({
+    lat: 40.7128,
+    lng: -74.006,
+  });
   const [locations, setLocations] = useState([]);
   const [formInfoWindowPosition, setFormInfoWindowPosition] = useState(null);
 
@@ -20,6 +23,25 @@ const GoogleMapPackage = () => {
   // BE - TODO
   // DELETE a location
   // UPDATE a location
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error getting current location", error);
+          setCurrentLocation({ lat: 40.7128, lng: -74.006 });
+        }
+      );
+    } else {
+      console.log("Not Available");
+    }
+  }, []);
 
   const fetchLocations = async () => {
     try {
@@ -54,7 +76,7 @@ const GoogleMapPackage = () => {
   return (
     <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
       <Map
-        defaultCenter={position}
+        defaultCenter={currentLocation}
         defaultZoom={15}
         mapId={process.env.REACT_APP_GOOGLE_MAPS_MAP_ID}
         // colorScheme={darkMode ? "DARK" : null}
