@@ -7,11 +7,12 @@ import axiosInstance from "../config/axiosconfig";
 const GoogleMapPackage = () => {
   // const [darkMode, setDarkMode] = useState(false);
   const [currentLocation, setCurrentLocation] = useState({
-    lat: 40.7128,
-    lng: -74.006,
+    lat: 0,
+    lng: 0,
   });
   const [locations, setLocations] = useState([]);
   const [formInfoWindowPosition, setFormInfoWindowPosition] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // TODO
   // FE Design
@@ -32,14 +33,18 @@ const GoogleMapPackage = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          setLoading(false);
         },
         (error) => {
           console.error("Error getting current location", error);
+          setLoading(false);
           setCurrentLocation({ lat: 40.7128, lng: -74.006 });
         }
       );
     } else {
       console.log("Not Available");
+      setLoading(false);
+      setCurrentLocation({ lat: 40.7128, lng: -74.006 });
     }
   }, []);
 
@@ -72,6 +77,10 @@ const GoogleMapPackage = () => {
       lng: e.detail.latLng.lng,
     });
   };
+
+  if (loading) {
+    return <div>Loading Map...</div>;
+  }
 
   return (
     <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
