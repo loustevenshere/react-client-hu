@@ -1,75 +1,22 @@
 import { APIProvider, Map, InfoWindow } from "@vis.gl/react-google-maps";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import InfoWindowForm from "./InfoWindowForm";
 import { CustomMarker } from "./CustomMarker";
-import axiosInstance from "../config/axiosconfig";
-
+import { useGeolocation } from "./hooks/useGeolocation";
+import { useLocations } from "./hooks/useLocations";
 const GoogleMapPackage = () => {
-  // const [darkMode, setDarkMode] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState({
-    lat: 0,
-    lng: 0,
-  });
-  const [locations, setLocations] = useState([]);
+  const { currentLocation, loading } = useGeolocation();
+  const { locations, saveLocation } = useLocations();
   const [formInfoWindowPosition, setFormInfoWindowPosition] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  // TODO
-  // FE Design
-  // style infowindow form - think about design
-  // style marker info window - closer there I believe
-  // change zoom on click?
-  // hover state over markers??
-
-  // BE - TODO
-  // DELETE a location
-  // UPDATE a location
-
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        function (position) {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLoading(false);
-        },
-        (error) => {
-          console.error("Error getting current location", error);
-          setLoading(false);
-          setCurrentLocation({ lat: 40.7128, lng: -74.006 });
-        }
-      );
-    } else {
-      console.log("Not Available");
-      setLoading(false);
-      setCurrentLocation({ lat: 40.7128, lng: -74.006 });
-    }
-  }, []);
-
-  const fetchLocations = async () => {
+  const handleSaveLocation = async (newLocation) => {
     try {
-      const response = await axiosInstance.get("/api/locations");
-      setLocations(response.data);
-    } catch (error) {
-      console.error("Error fetching locations", error);
-    }
-  };
-
-  const saveLocation = async (newLocation) => {
-    try {
-      const response = await axiosInstance.post("/api/locations", newLocation);
-      setLocations((prev) => [...prev, response.data]);
+      await saveLocation(newLocation);
       setFormInfoWindowPosition(null);
     } catch (error) {
       console.error("Error saving location", error);
     }
   };
-
-  useEffect(() => {
-    fetchLocations();
-  }, []);
 
   const handleMapClick = (e) => {
     setFormInfoWindowPosition({
@@ -88,7 +35,6 @@ const GoogleMapPackage = () => {
         defaultCenter={currentLocation}
         defaultZoom={15}
         mapId={process.env.REACT_APP_GOOGLE_MAPS_MAP_ID}
-        // colorScheme={darkMode ? "DARK" : null}
         style={{ height: "100vh" }}
         onClick={handleMapClick}
         gestureHandling={"cooperative"}
@@ -108,7 +54,7 @@ const GoogleMapPackage = () => {
           >
             <InfoWindowForm
               infoWindowPosition={formInfoWindowPosition}
-              onSubmit={saveLocation}
+              onSubmit={handleSaveLocation}
             />
           </InfoWindow>
         ) : null}
