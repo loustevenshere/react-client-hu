@@ -71,7 +71,7 @@ export default function InfoWindowForm({ onSubmit, infoWindowPosition }) {
             htmlFor="type"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Type
+            Color
           </label>
           <select
             id="type"
@@ -81,10 +81,10 @@ export default function InfoWindowForm({ onSubmit, infoWindowPosition }) {
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             required
           >
-            <option value="">Select type</option>
-            <option value="personal">Personal</option>
-            <option value="work">Work</option>
-            <option value="project">Project</option>
+            <option value="">Select Color</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="purple">Purple</option>
           </select>
         </div>
 

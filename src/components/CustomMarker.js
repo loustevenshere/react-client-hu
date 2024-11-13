@@ -7,9 +7,9 @@ import {
 } from "@vis.gl/react-google-maps";
 
 const typeColors = {
-  personal: "bg-blue-500",
-  work: "bg-green-500",
-  project: "bg-purple-500",
+  blue: "bg-blue-500",
+  green: "bg-green-500",
+  purple: "bg-purple-500",
   default: "bg-gray-500",
 };
 
@@ -25,7 +25,6 @@ const MarkerInfoWindow = ({ location, marker, onClose }) => {
         <h3 className="text-lg font-semibold text-black">{location.title}</h3>
       </div>
       <p className="text-sm text-gray-700 mb-2">{location.description}</p>
-      <p className="text-sm font-semibold text-gray-900">{location.type}</p>
     </InfoWindow>
   );
 };
