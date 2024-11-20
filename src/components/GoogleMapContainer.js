@@ -14,12 +14,18 @@ const GoogleMapPackage = () => {
   const [formInfoWindowPosition, setFormInfoWindowPosition] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // TODO
+  // COLOR TODO:
+  // Style marker info window to look clean
+  // Change color in formData
+
+  // TODO - ideas
   // FE Design
   // style infowindow form - think about design
   // style marker info window - closer there I believe
   // change zoom on click?
   // hover state over markers??
+  // Form should not grow greater with size
+  // Add button to go back to current location
 
   // BE - TODO
   // DELETE a location
@@ -33,6 +39,11 @@ const GoogleMapPackage = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          console.log(
+            "Current Location",
+            position.coords.latitude,
+            position.coords.longitude
+          );
           setLoading(false);
         },
         (error) => {
