@@ -1,34 +1,10 @@
 import React, { useState } from "react";
 import {
   AdvancedMarker,
-  InfoWindow,
   Pin,
   useAdvancedMarkerRef,
 } from "@vis.gl/react-google-maps";
-
-const typeColors = {
-  personal: "bg-blue-500",
-  work: "bg-green-500",
-  project: "bg-purple-500",
-  default: "bg-gray-500",
-};
-
-const MarkerInfoWindow = ({ location, marker, onClose }) => {
-  return (
-    <InfoWindow anchor={marker} onClose={onClose} className="p-2">
-      <div className="flex items-center mb-2">
-        <div
-          className={`w-4 h-4 rounded-full ${
-            typeColors[location.type] || typeColors.default
-          } mr-2`}
-        ></div>
-        <h3 className="text-lg font-semibold text-black">{location.title}</h3>
-      </div>
-      <p className="text-sm text-gray-700 mb-2">{location.description}</p>
-      <p className="text-sm font-semibold text-gray-900">{location.type}</p>
-    </InfoWindow>
-  );
-};
+import MarkerInfoWindow from "./MarkerInfoWindow";
 
 export const CustomMarker = ({ location }) => {
   const [isExpanded, setIsExpanded] = useState(false);
